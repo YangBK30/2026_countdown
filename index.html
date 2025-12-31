@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2026 CYBER SYSTEM ONLINE</title>
+  <style>
+    :root {
+      --blue:#00f5ff;--pink:#ff00ff;--green:#00ff9c;--red:#ff0033;--bg:#02040a;
+    }
+    body{
+      margin:0;font-family:"Orbitron","Segoe UI",sans-serif;
+      background:radial-gradient(circle at top,#0a0f2c,#02040a 70%);
+      color:var(--blue);height:100vh;overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+    }
+    body::before{content:"";position:absolute;inset:0;
+      background:repeating-linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.03) 1px,transparent 1px,transparent 3px);
+      pointer-events:none;}
+    canvas{position:absolute;inset:0;z-index:0;}
+    .container{z-index:1;width:90%;max-width:680px;padding:40px 30px;
+      background:rgba(5,10,30,.75);border-radius:18px;text-align:center;
+      box-shadow:0 0 25px rgba(0,245,255,.35),inset 0 0 35px rgba(255,0,255,.2);
+    }
+    h1{color:var(--pink);text-shadow:0 0 12px var(--pink);margin-bottom:20px;}
+    #countdown{font-size:1.6rem;letter-spacing:3px;color:var(--green);text-shadow:0 0 10px var(--green);margin-bottom:25px;}
+    .warning{color:var(--red);animation:blink .8s infinite;}
+    @keyframes blink{50%{opacity:.3}}
+    .actions{display:flex;gap:16px;justify-content:center;margin-bottom:15px;}
+    button{background:transparent;border:1px solid var(--blue);border-radius:30px;padding:10px 22px;color:var(--blue);
+      cursor:pointer;box-shadow:0 0 10px rgba(0,245,255,.4);transition:.25s}
+    button:hover{background:var(--blue);color:#000;box-shadow:0 0 18px var(--blue)}
+    .like-count{font-size:.85rem;opacity:.85;margin-bottom:20px}
+    .wish-section{display:none}
+    .wish-section input{width:85%;padding:8px 14px;border-radius:20px;border:none;outline:none;
+      background:#020814;color:var(--green);box-shadow:0 0 10px rgba(0,255,156,.4);margin-bottom:12px}
+    .wish-list{max-height:120px;overflow:hidden}
+    .wish-list ul{list-style:none;padding:0;margin:0;animation:scroll 14s linear infinite}
+    .wish-list li{font-size:.85rem;color:var(--blue);padding:4px 0}
+    @keyframes scroll{0%{transform:translateY(0)}100%{transform:translateY(-100%)}}
+    .new-year{display:none}
+    .new-year h1{font-size:2.3rem;color:var(--green);text-shadow:0 0 18px var(--green)}
+  </style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="container">
+  <div id="countdownPage">
+    <h1>SYSTEM COUNTDOWN → 2026</h1>
+    <div id="countdown"></div>
+    <div class="actions">
+      <button id="likeBtn">▲ LIKE</button>
+      <button id="wishBtn">◆ MESSAGE</button>
+    </div>
+    <div class="like-count">NEURAL SIGNALS: <span id="likeCount">0</span></div>
+    <div class="wish-section" id="wishSection">
+      <input id="wishInput" placeholder="> Enter your message…" />
+      <div class="wish-list"><ul id="wishList"></ul></div>
+    </div>
+  </div>
+  <div class="new-year" id="newYearPage">
+    <h1>WELCOME TO 2026</h1>
+    <p>System reboot complete · A new era online</p>
+  </div>
+</div>
+<script>
+/* ===== 背景粒子 ===== */
+const c=document.getElementById('bg'),ctx=c.getContext('2d');
+function resize(){c.width=innerWidth;c.height=innerHeight}resize();onresize=resize;
+let particles=Array.from({length:120},()=>({x:Math.random()*c.width,y:Math.random()*c.height,s:Math.random()*1.5+0.5}))
+function draw(){ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#00f5ff';particles.forEach(p=>{ctx.globalAlpha=.5;ctx.fillRect(p.x,p.y,1,6);p.y+=p.s;if(p.y>c.height)p.y=0});requestAnimationFrame(draw)}draw();
+/* ===== 倒计时 ===== */
+const cd=document.getElementById('countdown'),cp=document.getElementById('countdownPage'),ny=document.getElementById('newYearPage');
+const target=new Date('2026-01-01T00:00:00').getTime();
+function tick(){const d=target-Date.now();if(d<=0){cp.style.display='none';ny.style.display='block';return}
+ const s=Math.floor(d/1000)%60,m=Math.floor(d/6e4)%60,h=Math.floor(d/36e5)%24,day=Math.floor(d/864e5);
+ cd.textContent=`${day}D : ${h}H : ${m}M : ${s}S`;
+ if(d<10000)cd.classList.add('warning');}
+setInterval(tick,1000);tick();
+/* ===== 持久化点赞 ===== */
+let like=+localStorage.getItem('like')||0;likeCount.textContent=like;
+likeBtn.onclick=()=>{like++;localStorage.setItem('like',like);likeCount.textContent=like}
+/* ===== 持久化祝福 ===== */
+const wishes=JSON.parse(localStorage.getItem('wishes')||'[]');
+wishes.forEach(w=>addWish(w));
+wishBtn.onclick=()=>wishSection.style.display='block';
+wishInput.onkeydown=e=>{if(e.key==='Enter'&&wishInput.value.trim()){const v=wishInput.value.trim();wishes.push(v);localStorage.setItem('wishes',JSON.stringify(wishes));addWish(v);wishInput.value=''}}
+function addWish(t){const li=document.createElement('li');li.textContent='> '+t;wishList.appendChild(li)}
+</script>
+</body>
+</html>
